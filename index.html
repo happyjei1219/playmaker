@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PLAYMAKER v2.5 - Playlist Master Builder</title>
+<title>PLAYMAKER v2.6 - Playlist Master Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -77,7 +77,7 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font
 <body>
 <div class="wrap">
   <header>
-    <h1>PLAYMAKER<small>v2.5</small></h1>
+    <h1>PLAYMAKER<small>v2.6</small></h1>
     <p>설정을 고르면 플레이리스트 기획, 수노 스타일 프롬프트, 가사, 썸네일 카피, 설명란, 해시태그, 이미지 프롬프트를 한 번에 요청하는 명령어를 만들어 줍니다.</p>
   </header>
 
@@ -242,12 +242,13 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font
         </div>
       </div>
       <div class="field">
-        <label for="removalCommand">제거 명령어</label>
+        <label for="removalCommand">제외 스타일 (수노 Exclude Styles 칸)</label>
         <select id="removalCommand">
-          <option value="avoid harsh synths, avoid distorted drums, no aggressive bass, avoid mud in vocal frequencies">기본 노이즈 · 보컬 주파수 침범 차단</option>
-          <option value="avoid heavy drums, avoid loud percussion, no vocal masking">잔잔한 분위기 · 보컬 묻힘 방지</option>
-          <option value="no vocals, no singing voice, avoid vocal chops, pure instrumentals only">연주곡 전용 (보컬 완전 제거)</option>
+          <option value="harsh synths, distorted drums, aggressive bass, muddy vocals">기본 노이즈 · 보컬 주파수 침범 차단</option>
+          <option value="heavy drums, loud percussion, vocal masking, EDM drops">잔잔한 분위기 · 보컬 묻힘 방지</option>
+          <option value="vocals, singing, vocal chops, humming, choir">연주곡 전용 (보컬 완전 제거)</option>
         </select>
+        <p class="hint">스타일 프롬프트와 따로, 수노의 'Exclude Styles' 칸에 붙여 넣을 제외 목록을 만들어 줍니다.</p>
       </div>
     </section>
 
@@ -302,6 +303,17 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font
             <option value="1:1 square ratio (1080x1080 album cover)">1:1 (앨범 커버)</option>
           </select>
         </div>
+      </div>
+      <div class="field">
+        <label for="personLook">썸네일 인물</label>
+        <select id="personLook">
+          <option value="auto">주제·장소에 맞게 (기본)</option>
+          <option value="western">서양인 (유럽·미국 느낌)</option>
+          <option value="korean">한국인</option>
+          <option value="latin">라틴계 (남미·지중해 느낌)</option>
+          <option value="diverse">다양한 인종 섞기</option>
+        </select>
+        <p class="hint">인물이 나오는 이미지 프롬프트에 인물의 외모를 분명히 적어, 의도하지 않게 한국인·동양인으로 나오지 않게 합니다.</p>
       </div>
       <div class="field">
         <label for="imageCustom">세부 요청</label>
@@ -371,7 +383,7 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); font
     <p class="hint">AI가 대화 중에 규칙을 벗어나면 [규칙 리마인드 복사]로 만든 짧은 문구를 다음 요청 앞에 붙여 넣으세요.</p>
   </section>
 
-  <footer>PLAYMAKER v2.5 Educational Edition — AI Music Production Suite</footer>
+  <footer>PLAYMAKER v2.6 Educational Edition — AI Music Production Suite</footer>
 </div>
 
 <script>
@@ -470,7 +482,7 @@ function setInstrumental(on){
     $('vocalType').value = 'instrumental';
     $('lyricsLanguage').value = 'none';
     $('spatialTune').value = 'clean instrumental balance, organic acoustic space, clear instrument separation';
-    $('removalCommand').value = 'no vocals, no singing voice, avoid vocal chops, pure instrumentals only';
+    $('removalCommand').value = 'vocals, singing, vocal chops, humming, choir';
     $('startTag').selectedIndex = 1;
   }
   $('syncNote').classList.toggle('on', on);
@@ -511,6 +523,14 @@ function buildPrompt(){
   const scene = $('sceneConcept').value;
   const imgRatio = $('imageRatio').value;
   const imgCustom = $('imageCustom').value.trim();
+  const PERSON = {
+    auto: '주제와 장소에 어울리는 인물 — 장소가 해외(파리, 로마, 뉴욕 등)이면 그 지역 사람으로 묘사하고, 사용자가 요청하지 않는 한 한국인·동아시아인으로 설정하지 않는다',
+    western: 'Western / European-looking model (서양인)',
+    korean: 'Korean model (한국인)',
+    latin: 'Latin / Mediterranean-looking model (라틴계)',
+    diverse: 'diverse, mixed ethnicities (다양한 인종)'
+  };
+  const person = PERSON[$('personLook').value] || PERSON.auto;
   const tStyle = $('titleStyle').value;
   const tagLang = $('tagLanguage').value;
   const year = new Date().getFullYear();
@@ -651,7 +671,7 @@ ${pinGuide}
    - [메타 태그 원어 고정]: [Intro], [Verse], [Chorus], [Bridge], [Outro] 등 메타 태그와 연주 지시문은 영어로만 작성해라.${isForeign ? `
    - [원어민 검수]: 가사를 출력하기 전에 원어민이 들어도 어색하지 않은지 스스로 검수하고, 가사 코드블록 아래에 검수 결과를 한국어 2~3줄로 덧붙여라.` : ''}`;
 
-  return `[PLAYMAKER v2.5 - AI 음악 제작 통합 마스터 명령어]
+  return `[PLAYMAKER v2.6 - AI 음악 제작 통합 마스터 명령어]
 
 너는 음악 트렌드를 꿰뚫는 전문 앨범 프로듀서이자, 유튜브 알고리즘을 잘 아는 수석 마케팅 전문가야.
 아래 세팅값을 정밀하게 반영해 [1단계: 마스터 설계도 및 1번 트랙 전용 완벽 팩]을 출력해라.
@@ -659,7 +679,7 @@ ${pinGuide}
 ■ 대화 전체 고정 규칙 (이 대화의 모든 답변에 계속 적용)
 - 아래 세팅값과 출력 형식은 대화가 길어져도 바뀌지 않는다. 장르, 언어, 곡 길이, 형식을 임의로 바꾸지 마라.
 - 사용자가 요청하지 않은 설명, 제안, 다른 주제의 이야기를 덧붙이지 마라.
-- 이후 곡을 요청받으면 1단계에서 확정한 스타일 프롬프트 뼈대(장르, 악기, BPM 범위, 보컬, 공간감, 제거 명령어)를 그대로 유지하고 곡별 분위기만 변주해라.
+- 이후 곡을 요청받으면 1단계에서 확정한 스타일 프롬프트 뼈대(장르, 악기, BPM 범위, 보컬, 공간감)와 제외 스타일 목록을 그대로 유지하고 곡별 분위기만 변주해라.
 - 지시가 애매하면 추측해서 바꾸지 말고 이 규칙을 우선한다.
 
 ■ 핵심 음악 기획 & 사운드 세팅
@@ -673,7 +693,7 @@ ${pinGuide}
 ${genreLine}${g3 !== '없음' ? `\n- 질감 · 시대감: ${g3}` : ''}${customGenre ? `\n- 추가 세션 악기: ${customGenre}` : ''}
 - 보컬: ${vocal}${vocalCustom && !inst ? ` (추가 지시: ${vocalCustom})` : ''}
 - 분위기 및 공간감: ${mood}, ${spatial}
-- 제거 명령어: ${removal} (프롬프트 맨 마지막 위치 고정)
+- 제외 스타일 기본 목록: ${removal} (스타일 프롬프트 안에 넣지 말고, 수노 'Exclude Styles' 칸용으로 따로 출력)
 
 3. 시퀀싱 & 가사
 - 인트로 방식: ${startTag}
@@ -683,7 +703,8 @@ ${genreLine}${g3 !== '없음' ? `\n- 질감 · 시대감: ${g3}` : ''}${customGe
 - 장면 콘셉트: ${scene}
 - 이미지 비율: ${imgRatio}
 - 세부 요청: ${imgCustom || '없음 — 주제와 계절에 어울리게 직접 구성'}
-- 이미지 프롬프트 작성 지침: 선택한 장면 콘셉트를 구도의 중심으로 삼고 세부 요청을 빠짐없이 반영해라. 카메라 앵글(Eye-level, Wide-angle, Close-up 등), 피사체 구도, 피사계 심도, 조명을 섬세하게 묘사하고, 이미지 비율(${imgRatio})을 반드시 포함해라.
+- 인물 설정: ${person}
+- 이미지 프롬프트 작성 지침: 선택한 장면 콘셉트를 구도의 중심으로 삼고 세부 요청을 빠짐없이 반영해라. 카메라 앵글(Eye-level, Wide-angle, Close-up 등), 피사체 구도, 피사계 심도, 조명을 섬세하게 묘사하고, 이미지 비율(${imgRatio})을 반드시 포함해라. 인물이 등장하는 프롬프트에는 위 인물 설정에 맞는 인물의 외모(국적·인종 느낌)를 영문으로 반드시 명시해라.
 - 유튜브 제목 스타일: ${tStyle}
 - 해시태그: ${tagLang}, 노출 우선순위 [대형 검색어 → 타겟 라이프스타일 → 세부 장르] 순으로 정렬
 
@@ -734,7 +755,13 @@ ${n(9)}. [1번 트랙 완성 팩]
    2. 스타일 프롬프트 (Suno Style Prompt):
    \`\`\`text
    (아래 순서를 지켜 쉼표로 연결)
-   [결합 장르명] → [3개 이상 세션 악기] → [리듬 · 드럼] → [BPM 수치 (맨 뒤 금지, 중간~후반 배치)] → [${inst ? '연주곡 옵션 (no vocals)' : '보컬 톤 · 마이킹, vocal sits cleanly on top of mix'}] → [질감 · 공간감] → [분위기 · 장면] → [맨 뒤 제거 명령어]
+   [결합 장르명] → [3개 이상 세션 악기] → [리듬 · 드럼] → [BPM 수치 (맨 뒤 금지, 중간~후반 배치)] → [${inst ? '연주곡 옵션 (no vocals)' : '보컬 톤 · 마이킹, vocal sits cleanly on top of mix'}] → [질감 · 공간감] → [분위기 · 장면]
+   (no, avoid 같은 제거 명령어는 여기에 넣지 않는다)
+   \`\`\`
+
+   2-1. 제외 스타일 (Suno Exclude Styles 칸):
+   \`\`\`text
+   (제외 스타일 기본 목록에 이 곡의 장르·보컬 설정상 섞이면 안 되는 요소를 2~4개 더해, 영어 단어만 쉼표로 연결. no, avoid 같은 부정어는 쓰지 않는다. 예: harsh synths, distorted drums, male vocals, rap)
    \`\`\`
 
    3. ${inst ? '연주 구성' : '가사'} (Suno Lyrics Box):
@@ -746,7 +773,7 @@ ${lyricRules}
 ----------------------------------------------------------------------
 
 ※ 1단계 출력이 끝나면 맨 아래에 다음 안내를 남겨라:
-"다음 곡을 원하시면 곡 번호를 입력하세요. 앨범 전체의 스타일 프롬프트 뼈대를 그대로 유지하면서 '1. 제목', '2. 스타일 프롬프트(코드블록)', '3. ${inst ? '연주 구성' : '가사'}(코드블록)'을 출력해 드립니다. (예: '2번 곡 만들어줘', '나머지 전 곡 출력해줘')"`;
+"다음 곡을 원하시면 곡 번호를 입력하세요. 앨범 전체의 스타일 프롬프트 뼈대를 그대로 유지하면서 '1. 제목', '2. 스타일 프롬프트(코드블록)', '2-1. 제외 스타일(코드블록)', '3. ${inst ? '연주 구성' : '가사'}(코드블록)'을 출력해 드립니다. (예: '2번 곡 만들어줘', '나머지 전 곡 출력해줘')"`;
 }
 
 function buildReminder(){
@@ -758,9 +785,10 @@ function buildReminder(){
 앞서 확정한 설계를 그대로 유지해라. 아래 규칙 외의 내용은 출력하지 마라.
 - 장르: ${g2 ? g1 + ' + ' + g2 + ' 결합 장르 (1단계에서 정한 장르명 그대로)' : g1}
 - 가사 언어: ${lang} / 곡 길이: ${selectedText('songLength')}
-- 스타일 프롬프트: 1단계에서 확정한 뼈대(장르 → 악기 → 리듬 → BPM → ${inst ? '연주곡 옵션' : '보컬'} → 공간감 → 분위기 → 제거 명령어)를 유지하고 곡 분위기만 변주
+- 스타일 프롬프트: 1단계에서 확정한 뼈대(장르 → 악기 → 리듬 → BPM → ${inst ? '연주곡 옵션' : '보컬'} → 공간감 → 분위기)를 유지하고 곡 분위기만 변주
+- 제외 스타일: 1단계에서 정한 목록을 그대로 따로 출력 (스타일 프롬프트 안에 넣지 않음)
 ${inst ? '- 연주 구성: 영문 메타 태그만 작성' : '- 가사: 모든 섹션 짝수 줄, 지정 언어로만 작성, 번역 · 주석 금지, 메타 태그는 영어'}
-- 출력 형식: 1. 제목 / 2. 스타일 프롬프트(코드블록) / 3. ${inst ? '연주 구성' : '가사'}(코드블록)
+- 출력 형식: 1. 제목 / 2. 스타일 프롬프트(코드블록) / 2-1. 제외 스타일(코드블록) / 3. ${inst ? '연주 구성' : '가사'}(코드블록)
 - 요청하지 않은 설명이나 제안은 덧붙이지 마라.
 
 요청: `;
